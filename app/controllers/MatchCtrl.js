@@ -159,7 +159,7 @@ matchCtrl.declareResults = async (req,res) =>{
                         await Wallet.findOneAndUpdate({userId : e.userId},{$inc: { amount : prize.prize }})
                         const body = {
                             userId : e.userId,
-                            text : `Congratulations you won Rs ${prize.prize} in ${match.team1} vs ${match.team2}`,
+                            text : `🏆 Congratulations you won Rs ${prize.prize} in ${match.team1} vs ${match.team2}`,
                             date : new Date()
                         }
                         const notification = new Notification(body)
@@ -193,7 +193,7 @@ matchCtrl.cancelMatch =  async (req,res) =>{
         res.status(500).json(e)
     }
     const io = await getIOInstance()
-    io.to(`${req.params.matchid}`).emit("cancel","match has been cancelled, if u had joined any contest , ur money will be refunded")
+    io.to(`${req.params.matchid}`).emit("cancel"," ❌ match has been cancelled, if u had joined any contest , ur money will be refunded")
 }
 
 matchCtrl.extendDeadline = async (req,res) =>{
