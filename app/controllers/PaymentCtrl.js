@@ -37,11 +37,11 @@ paymentCtrl.checkout = async (req,res) =>{
             payment_method_types : ['card'],
             line_items : lineItems,
             mode : "payment",
-            success_url : "http://localhost:3000/success",
+            success_url : `http://localhost:3000/success`,
             cancel_url : "http://localhost:3000/failure",
             customer : customer.id
         })
-        console.log(session.id, "sessionid fanatsyapp")
+        console.log(session.id, "sessionid fanatsyApp")
         res.json({id : session.id})
 
     }catch(e){

@@ -54,11 +54,13 @@ const matchValidation = {
         notEmpty : {
             errorMessage : "date is required"
         },
-        custom : (value) =>{
-            if(new Date(value) < new Date()){
-                throw new Error("deadline should be greater than now")
-            }else{
-                return true
+        custom : {
+            options : (value) =>{
+                if(new Date(value) < new Date()){
+                    throw new Error("deadline should be greater than now")
+                }else{
+                    return true
+                }
             }
         }
     }

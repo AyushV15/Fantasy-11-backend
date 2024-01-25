@@ -7,6 +7,7 @@ const User = require("../models/User")
 const Notification = require("../models/Notification")
 const Wallet = require("../models/Wallet")
 const { getIOInstance } = require("../../config/socketConfig")
+const jwt = require('jsonwebtoken')
 
 
 
@@ -133,7 +134,7 @@ matchCtrl.generateResults = async (req,res) =>{
               })
               await Contest.findByIdAndUpdate(ele._id,{teams : sort})
         })
-        res.json(contests)
+        res.json("hi")
     }catch(e){
         res.json(e)
     }
@@ -144,6 +145,10 @@ matchCtrl.declareResults = async (req,res) =>{
     const matchid = req.params.matchid
     try{
         const match = await Match.findById(matchid)
+        if(match.isCompleted){
+           return res.status(400).json("results have been aldready declared")
+        }
+
         const contests = await Contest.find({matchid : matchid}).populate('teams')
         console.log(contests)
         contests.map(async (ele) =>{
