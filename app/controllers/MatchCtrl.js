@@ -69,6 +69,7 @@ matchCtrl.upcomingMatches = async (req,res) =>{
 
     try{
         const match = await Match.find({ deadline: { $gt: new Date() } }).sort({deadline : 1}).skip(skip).limit(2)
+        // const match await Match.find().skip().limit()
         
         res.status(200).json(match)
     }catch(e){

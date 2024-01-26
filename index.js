@@ -40,7 +40,7 @@ server.listen(port ,()=>{
 })
 
 //webhook route for managing payments
-app.post('/webhook',express.raw({type : "application/json"}),paymentCtrl.webhook) 
+// app.post('/webhook',express.raw({type : "application/json"}),paymentCtrl.webhook) 
 
 app.use(express.json())
  
@@ -98,6 +98,8 @@ app.get("/api/users/wallet",authenticateUser,UserCtrl.wallet)
 
 //payment routes
 app.post('/api/checkout',authenticateUser,paymentCtrl.checkout)
+app.put("/api/update-payment",authenticateUser,paymentCtrl.updatePayment)
+app.delete("/api/delete-payment/:id",authenticateUser,paymentCtrl.deletePayment)
 
 
 //notification routes

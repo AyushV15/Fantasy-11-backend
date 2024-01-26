@@ -5,6 +5,11 @@ const paymentSchema = new Schema({
     userId : Schema.Types.ObjectId,
     amount : Number,
     date : String,
+    status : {
+        type : String,
+        default : "pending",
+        enum : ["pending","successfull"]
+    },
     paymentType : String,
     transaction_Id : String
 })

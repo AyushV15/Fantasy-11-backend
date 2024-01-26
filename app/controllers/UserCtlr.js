@@ -126,8 +126,8 @@ UserCtrl.updateProfile = async (req,res) =>{
             }
         }
         
-        await User.findByIdAndUpdate(req.user.id,{profilePic : req.file.originalname})
-        res.json({message : "Profile Update Successfully"})
+        const updateUser = await User.findByIdAndUpdate(req.user.id,{profilePic : req.file.originalname},{new : true})
+        res.status(200).json(updateUser)
     }catch(e){
         res.status(500).json(e)
     } 
