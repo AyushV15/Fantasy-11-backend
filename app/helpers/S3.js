@@ -47,7 +47,6 @@ const playerUpload = multer({
         contentType : multers3.AUTO_CONTENT_TYPE,
         key : function (req,file,cb){
             cb(null, "players/" + file.originalname)
-            console.log(file)
         }
     })
 })

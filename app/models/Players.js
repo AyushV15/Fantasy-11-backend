@@ -5,7 +5,10 @@ const {Schema,model} = mongoose
 const playerSchema = new Schema({
     name : String,
     pic : String,
-    role : String,
+    role : {
+        type : String,
+        enum : ["wk","bat","all","bowl"]
+    },
     nationality : String,
     score : {
         type :Number,

@@ -16,11 +16,6 @@ const playerValidation = {
         notEmpty : {
             errorMessage : "Country is required"
         }
-    },
-    pic : {
-        notEmpty : {
-            errorMessage : "pic is required"
-        }
     }
 }
 

@@ -77,6 +77,7 @@ app.put("/api/match/:matchid/edit-team",authenticateUser,teamCtrl.updateTeam)
 app.get("/api/players",authenticateUser,authoriseUser(["admin"]),playerCtrl.listPlayers)
 app.post("/api/players",authenticateUser,playerUpload.single("pic"),checkSchema(playerValidation),playerCtrl.createPlayer)
 app.delete("/api/players/:id",authenticateUser,authoriseUser(["admin"]),playerCtrl.deletePlayer)
+app.put("/api/players/:id",authenticateUser,playerUpload.single("pic"),authoriseUser(["admin"]),checkSchema(playerValidation),playerCtrl.editPlayer)
 
 
 //contest-routes
