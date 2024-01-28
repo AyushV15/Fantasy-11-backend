@@ -109,8 +109,12 @@ UserCtrl.account = async (req,res)=>{
 }
 
 UserCtrl.updateProfile = async (req,res) =>{
-    const body = req.body
-    console.log(body)
+    const errors = validationResult(req)
+    console.log(errors,"sadf")
+    if(!errors.isEmpty()){
+        return res.status(400).json({errors : errors.array()})
+    }
+    const body = _.pick(req.body,["currentPassword","newPassword"])
     try{
         if(body.currentPassword){
             const user = await  User.findById(req.user.id)
@@ -133,15 +137,6 @@ UserCtrl.updateProfile = async (req,res) =>{
     } 
 }
 
-UserCtrl.debitWallet = async (req,res) =>{
-    const body = req.body
-    try{
-        const user = await User.findById(req.user.id)
-        user.wallet -= body
-    }catch(e){
-        console.log(e)
-    }
-}
 
 UserCtrl.wallet = async (req,res) =>{
     try{
@@ -174,7 +169,7 @@ UserCtrl.forgotPassword = async (req,res) =>{
             res.status(200).json({token : token})
             
             let mailDetails = {
-                from: 'avcodes701@gmail.com',
+                from: process.env.NODEMAILER_EMAIL,
                 to: `${user.email}`,
                 subject: 'Fantasy 11 (reset - password-link)',
                 html : `<a href=http://localhost:3000/forgot-password?token=${token}>Click here to reset your password</a>

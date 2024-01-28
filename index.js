@@ -2,7 +2,7 @@ require("dotenv").config()
 const express = require("express")
 const configdb = require("./config/db")
 const { checkSchema } = require("express-validator")
-const { registerSchema, loginSchema} = require("./app/Validations/UserValidation")
+const { registerSchema, loginSchema,updateProfile} = require("./app/Validations/UserValidation")
 const UserCtrl = require("./app/controllers/UserCtlr")
 const port = process.env.PORT
 const app = express()
@@ -52,8 +52,7 @@ app.get("/api/matches",authenticateUser,authoriseUser(["admin"]),matchCtrl.listM
 app.post("/api/users/register",checkSchema(registerSchema),UserCtrl.register)
 app.post("/api/users/login",checkSchema(loginSchema),UserCtrl.login)
 app.get("/api/users/dashboard",authenticateUser,UserCtrl.account)
-app.put("/api/users/debit-wallet",authenticateUser,UserCtrl.debitWallet)
-app.put("/api/users/update-profile",authenticateUser,userUpload.single('profilePic'),UserCtrl.updateProfile)
+app.put("/api/users/update-profile",authenticateUser,userUpload.single('profilePic'),checkSchema(updateProfile),UserCtrl.updateProfile)
 
 
 //match routes

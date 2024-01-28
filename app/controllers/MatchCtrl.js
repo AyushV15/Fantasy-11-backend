@@ -251,7 +251,7 @@ matchCtrl.stats = async (req,res) =>{
                         $map: {
                             input: "$contests",
                             as: "contest",
-                            in: { $multiply: ["$$contest.entryFee", "$$contest.slots" , 0.10 ] }
+                            in: { $multiply: ["$$contest.entryFee", { $size: "$$contest.teams" } , 0.10 ] }
                         }
                     }
                 }

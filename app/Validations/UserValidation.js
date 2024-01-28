@@ -88,18 +88,53 @@ const userloginValidation = {
     }
 }
 
-const userloginOTPValidation = {
-    email : {
-        notEmpty : {
-            errorMessage : "required"
-        },
-        isEmail : {
-            errorMessage : "enter valid email"
+const updateProfileValidation = {
+    profilePic : {
+        custom : {
+            options : async (value, {req}) =>{
+                if(req.file){
+                    const allowedType = ["image/jpeg"]
+                    console.log(req.file.mimetype)
+                    if(!allowedType.includes(req.file.mimetype)){
+                        throw new Error('Only JPEG images are allowed')
+                    }
+                    const maxSizeInBytes = 3 * 1024 * 1024; // 3MB
+                    if (req.file.size > maxSizeInBytes) {
+                    throw new Error('Image size exceeds 3MB limit')
+                    }
+                }else{
+                    return true
+                }
+            }
         }
     },
-    OTP : {
-        notEmpty : {
-            errorMessage : "required"
+    currentPassword : {
+        custom : {
+            options : async (value,{req}) =>{
+                if(Object.keys(req.body).length > 0){
+                    if(value.trim().length < 8){
+                        console.log(value,"inside valid")
+                        throw new Error("current Password should be between 8 to 128 characters")
+                    }
+                }else{
+                    return true
+                }
+            }
+        }
+    },
+    newPassword : {
+        custom : {
+            options : async (value,{req}) =>{
+             
+                if(Object.keys(req.body).length > 0){
+                    if(value.trim().length < 8){
+                        console.log("error")
+                        throw new Error("new Password should be between 8 to 128 characters")
+                    }
+                }else{
+                    return true
+                }
+            }
         }
     }
 }
@@ -107,5 +142,5 @@ const userloginOTPValidation = {
 module.exports = {
     registerSchema : userValidationSchema,
     loginSchema : userloginValidation,
-    loginOTPschema : userloginOTPValidation
+    updateProfile : updateProfileValidation
 }
