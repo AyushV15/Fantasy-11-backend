@@ -223,6 +223,7 @@ matchCtrl.stats = async (req,res) =>{
                     as : "users"
                 }
             },
+            //getting all the contests of that match
             {
                 $lookup : {
                     from : "contests",
@@ -233,13 +234,13 @@ matchCtrl.stats = async (req,res) =>{
             },
             {
                 $addFields : {
-                    users : {$size : "$users"},
-                    contest : {$size : "$contests"},
+                    users : {$size : "$users"}, // users count
+                    contest : {$size : "$contests"}, // contest count
                     revenue: {
                         $map: {
                             input: "$contests",
                             as: "contest",
-                            in: { $multiply: ["$$contest.entryFee", { $size: "$$contest.teams" }] }
+                            in: { $multiply: ["$$contest.entryFee", { $size: "$$contest.teams" }] } 
                         }
                     },
                     profit : {
