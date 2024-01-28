@@ -211,4 +211,66 @@ matchCtrl.extendDeadline = async (req,res) =>{
     }
 }
 
+matchCtrl.stats = async (req,res) =>{
+    try{
+        const stats = await Match.aggregate([
+            //getting the users u have joined the a match
+            {
+                $lookup : {
+                    from : "users",
+                    localField : "_id",
+                    foreignField : "matches",
+                    as : "users"
+                }
+            },
+            {
+                $lookup : {
+                    from : "contests",
+                    localField : "_id",
+                    foreignField : "matchid",
+                    as : "contests"
+                }
+            },
+            {
+                $addFields : {
+                    users : {$size : "$users"},
+                    contest : {$size : "$contests"},
+                    revenue: {
+                        $map: {
+                            input: "$contests",
+                            as: "contest",
+                            in: { $multiply: ["$$contest.entryFee", { $size: "$$contest.teams" }] }
+                        }
+                    },
+                    profit : {
+                        $map: {
+                            input: "$contests",
+                            as: "contest",
+                            in: { $multiply: ["$$contest.entryFee", "$$contest.slots" , 0.10 ] }
+                        }
+                    }
+                }
+            },
+            {
+                $project: {
+                    _id: 1,
+                    team1: 1,
+                    team2: 1,
+                    users : 1,
+                    contest : 1,
+                    deadline: 1,
+                    revenue : {
+                        $sum : "$revenue"
+                    },
+                    profit : {
+                        $sum : "$profit"
+                    }
+                }
+            }
+        ])
+        res.status(200).json(stats)
+    }catch(e){
+        console.log(e)
+    }
+}
 module.exports = matchCtrl       

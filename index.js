@@ -20,6 +20,9 @@ const notificationCtrl = require("./app/controllers/NotificationCtrl")
 const matchValidation = require("./app/Validations/MatchValidation")
 const {userUpload ,matchUpload,playerUpload} = require("./app/helpers/S3")
 const playerValidation = require("./app/Validations/PlayerValidation")
+const Match = require("./app/models/Match")
+const Contest = require("./app/models/Contest")
+const { match } = require("assert")
 
 const server = http.createServer(app)
 const io = new Server(server,{
@@ -65,6 +68,7 @@ app.get("/api/match/:id",authenticateUser,matchCtrl.oneMatch)
 app.put('/api/match/:matchid/score-updates',authenticateUser,authoriseUser(['admin']),matchCtrl.scoreUpdates)
 app.delete("/api/match/:matchid/cancel-match",authenticateUser,matchCtrl.cancelMatch)
 app.put("/api/matches/:matchid",authenticateUser,authoriseUser(['admin']),matchCtrl.extendDeadline)
+app.get('/api/stats',authenticateUser,authoriseUser(["admin"]),matchCtrl.stats)
 
 
 //team routes
@@ -116,6 +120,7 @@ app.post("/api/reset-password",UserCtrl.resetPassword)
 
 
 
+ 
 
 
 
