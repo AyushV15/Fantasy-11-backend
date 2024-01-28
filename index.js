@@ -1,10 +1,11 @@
+require("dotenv").config()
 const express = require("express")
 const configdb = require("./config/db")
 const { checkSchema } = require("express-validator")
-const { registerSchema, loginSchema, loginOTPschema } = require("./app/Validations/UserValidation")
+const { registerSchema, loginSchema} = require("./app/Validations/UserValidation")
 const UserCtrl = require("./app/controllers/UserCtlr")
+const port = process.env.PORT
 const app = express()
-const port = 3300
 const cors = require("cors")
 const {authenticateUser, authoriseUser} = require("./auth")
 const matchCtrl = require("./app/controllers/MatchCtrl")
@@ -20,9 +21,6 @@ const notificationCtrl = require("./app/controllers/NotificationCtrl")
 const matchValidation = require("./app/Validations/MatchValidation")
 const {userUpload ,matchUpload,playerUpload} = require("./app/helpers/S3")
 const playerValidation = require("./app/Validations/PlayerValidation")
-const Match = require("./app/models/Match")
-const Contest = require("./app/models/Contest")
-const { match } = require("assert")
 
 const server = http.createServer(app)
 const io = new Server(server,{
@@ -33,7 +31,7 @@ require("./config/socketConfig")(io)
 
 const multipleuploads = matchUpload.fields([{name : "team1logo",maxCount : 1},{name : "team2logo",maxCount : 1}])
 
-require("dotenv").config()
+
 
 app.use(cors())   
 configdb() 
@@ -41,9 +39,6 @@ configdb()
 server.listen(port ,()=>{
     console.log('server is running on ', port)
 })
-
-//webhook route for managing payments
-// app.post('/webhook',express.raw({type : "application/json"}),paymentCtrl.webhook) 
 
 app.use(express.json())
  

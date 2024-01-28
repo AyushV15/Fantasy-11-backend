@@ -2,7 +2,7 @@ const paymentCtrl = {}
 const Wallet = require('../models/Wallet')
 const Payment = require('../models/Payment')
 const stripe = require('stripe')
-('sk_test_51OUVJySJWZzpdKdVBdU9whwMXkZuvOLanbivOpzlFVF158hISAl2bsAmGaPbhdynPynsW7lzlE8zeSbmEbnkPIXA007HKkoPXX')
+(process.env.STRIPE_KEY)
 
 
 paymentCtrl.checkout = async (req,res) =>{
@@ -37,8 +37,8 @@ paymentCtrl.checkout = async (req,res) =>{
             payment_method_types : ['card'],
             line_items : lineItems,
             mode : "payment",
-            success_url : `http://localhost:3000/success`,
-            cancel_url : "http://localhost:3000/failure",
+            success_url : process.env.SUCCESS_URL,
+            cancel_url : process.env.FAILURE_URL,
             customer : customer.id
         })
         res.json({id : session.id , url : session.url })

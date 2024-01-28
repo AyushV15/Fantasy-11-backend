@@ -4,8 +4,6 @@ const Wallet = require("../models/Wallet")
 const Notification = require("../models/Notification")
 const { getIOInstance } = require("../../config/socketConfig")
 
-
-
 const contestCtrl = {}
 
 contestCtrl.listContest = async (req,res) =>{
@@ -54,7 +52,7 @@ contestCtrl.joinContest = async (req,res) =>{
         }
         wallet.amount -= entryFee
         wallet.save()
-        await Wallet.findByIdAndUpdate("65aa5079c92fe274b69f7424",{ $inc: { amount: entryFee }})
+        await Wallet.findByIdAndUpdate(process.env.ADMIN_WALLET,{ $inc: { amount: entryFee }})
         const contest = await Contest.findByIdAndUpdate(id,{$push : {teams : team}})
         res.status(201).json(contest)
     }catch(e){
