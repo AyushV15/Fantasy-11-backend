@@ -7,7 +7,6 @@ const User = require("../models/User")
 const Notification = require("../models/Notification")
 const Wallet = require("../models/Wallet")
 const { getIOInstance } = require("../../config/socketConfig")
-const jwt = require('jsonwebtoken')
 
 
 
@@ -212,6 +211,11 @@ matchCtrl.extendDeadline = async (req,res) =>{
 }
 
 matchCtrl.stats = async (req,res) =>{
+
+    const query = req.query.sort || "deadline" 
+    const order = req.query.order || "true"
+    console.log(order)
+    console.log(query)
     try{
         const stats = await Match.aggregate([
             //getting the users u have joined the a match
@@ -225,7 +229,7 @@ matchCtrl.stats = async (req,res) =>{
             },
             //getting all the contests of that match
             {
-                $lookup : {
+                $lookup : { 
                     from : "contests",
                     localField : "_id",
                     foreignField : "matchid",
@@ -268,7 +272,7 @@ matchCtrl.stats = async (req,res) =>{
                     }
                 }
             }
-        ])
+        ]).sort({[query] : order == "true" ? 1 : -1})
         res.status(200).json(stats)
     }catch(e){
         console.log(e)
