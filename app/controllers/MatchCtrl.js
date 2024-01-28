@@ -152,7 +152,7 @@ matchCtrl.declareResults = async (req,res) =>{
         const contests = await Contest.find({matchid : matchid}).populate('teams')
         console.log(contests)
         contests.map(async (ele) =>{
-            await Wallet.findByIdAndUpdate("659ad4e347e16abda2bd5c7b",{$inc: { amount : -ele.totalPrize}})
+            await Wallet.findOneAndUpdate({role : "admin"},{$inc: { amount : -ele.totalPrize}})
             ele.teams.forEach((e,i) =>{
                 ele.prizeBreakup.forEach( async (prize) =>{
                     if(prize.rank == i + 1){

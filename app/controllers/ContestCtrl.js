@@ -5,6 +5,7 @@ const Notification = require("../models/Notification")
 const { getIOInstance } = require("../../config/socketConfig")
 
 
+
 const contestCtrl = {}
 
 contestCtrl.listContest = async (req,res) =>{
@@ -43,12 +44,18 @@ contestCtrl.joinContest = async (req,res) =>{
     if(!errors.isEmpty()){
         return res.status(400).json({errors : errors.array()})
     }
-    const id = req.params.contestid
-    const body = req.body
+    const id = req.params.contestid 
+    const {team,entryFee} = req.body
+    console.log(entryFee)
     try{
-        const contest = await Contest.findByIdAndUpdate(id,{$push : {teams : body}})
-        await Wallet.findByIdAndUpdate("659ad4e347e16abda2bd5c7b",{ $inc: { amount: contest.entryFee }})
-        await Wallet.findOneAndUpdate({userId : req.user.id},{ $inc: { amount: -contest.entryFee }})
+        const wallet =  await Wallet.findOne({userId : req.user.id})
+        if(wallet.amount < entryFee){
+            return res.status(400).json({errors : "Low wallet balance"})
+        }
+        wallet.amount -= entryFee
+        wallet.save()
+        await Wallet.findByIdAndUpdate("65aa5079c92fe274b69f7424",{ $inc: { amount: entryFee }})
+        const contest = await Contest.findByIdAndUpdate(id,{$push : {teams : team}})
         res.status(201).json(contest)
     }catch(e){
         res.status(500).json(e)
