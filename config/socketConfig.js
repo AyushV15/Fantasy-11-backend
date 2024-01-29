@@ -6,6 +6,11 @@ module.exports = function (io) {
         const connectionHandler = (socket) => {
             console.log('A user connected');
 
+            socket.on('user', (userId) =>{
+                socket.join(userId)
+                console.log(`User connected: ${userId}`)
+            })
+
             socket.on('joinMatchRoom', (matchId) => {
                 socket.join(matchId);
                 console.log(`User joined room: ${matchId}`);

@@ -96,7 +96,7 @@ const updateProfileValidation = {
                     const allowedType = ["image/jpeg"]
                     console.log(req.file.mimetype)
                     if(!allowedType.includes(req.file.mimetype)){
-                        throw new Error('Only JPEG images are allowed')
+                        throw new Error('Only JPEG/JPG images are allowed')
                     }
                     const maxSizeInBytes = 3 * 1024 * 1024; // 3MB
                     if (req.file.size > maxSizeInBytes) {

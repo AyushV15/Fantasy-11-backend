@@ -48,7 +48,7 @@ UserCtrl.register = async (req,res) =>{
         }else{
             user.role = "user"
         }
-        user.save()
+        await user.save()
         const wallet = new Wallet({userId : user._id})
         wallet.save()
         res.json(user)
@@ -92,13 +92,6 @@ UserCtrl.login = async (req,res) =>{
 UserCtrl.account = async (req,res)=>{
     try {
         const user = await User.findById(req.user.id).populate("matches")
-        // .populate({
-        //   path: 'contests',
-        //   populate: [
-        //     { path: 'teams', populate: { path: 'userId' } },
-        //     { path: 'matchid', model: 'Match' }
-        //   ]
-        // })
 
         res.status(200).json(user)
         console.log()
@@ -126,7 +119,7 @@ UserCtrl.updateProfile = async (req,res) =>{
                 await user.save()
                 return res.json(user)
             }else{
-                return res.status(400).json("current password do not match")
+                return res.status(400).json("invalid current Password")
             }
         }
         

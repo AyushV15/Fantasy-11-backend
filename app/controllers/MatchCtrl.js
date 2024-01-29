@@ -54,6 +54,7 @@ matchCtrl.createMatch = async (req,res) =>{
             return {...ele , team : body.team2}
         })
         await match.save()
+        await User.findOneAndUpdate({role : "admin"},{$push : {matches : match._id}})
         res.status(201).json(match) 
     }catch(e){
         res.status(500).json(e)
@@ -134,7 +135,7 @@ matchCtrl.generateResults = async (req,res) =>{
               })
               await Contest.findByIdAndUpdate(ele._id,{teams : sort})
         })
-        res.json("hi")
+        res.status(200).json("rank calculated successfully")
     }catch(e){
         res.json(e)
     }
@@ -142,6 +143,7 @@ matchCtrl.generateResults = async (req,res) =>{
 
 matchCtrl.declareResults = async (req,res) =>{
 
+    const io = await getIOInstance()
     const matchid = req.params.matchid
     try{
         const match = await Match.findById(matchid)
@@ -165,6 +167,8 @@ matchCtrl.declareResults = async (req,res) =>{
                         const notification = new Notification(body)
                         console.log(notification)
                         await notification.save()
+                        io.to(e.userId).emit("notification","hi")
+                        io.to(matchid).emit("matchEnded","results for this match have been declared")
                     }
                 })
             })
@@ -242,9 +246,9 @@ matchCtrl.stats = async (req,res) =>{
                     contest : {$size : "$contests"}, // contest count
                     revenue: {
                         $map: {
-                            input: "$contests",
-                            as: "contest",
-                            in: { $multiply: ["$$contest.entryFee", { $size: "$$contest.teams" }] } 
+                            input: "$contests", //array
+                            as: "contest", //each element
+                            in: { $multiply: ["$$contest.entryFee", { $size: "$$contest.teams" }] }  //evaluation
                         }
                     },
                     profit : {

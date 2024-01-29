@@ -11,7 +11,6 @@ const {authenticateUser, authoriseUser} = require("./auth")
 const matchCtrl = require("./app/controllers/MatchCtrl")
 const playerCtrl = require("./app/controllers/PlayerCtrl")
 const teamCtrl = require("./app/controllers/TeamCtrl")
-const path = require("path")
 const contestCtrl = require("./app/controllers/ContestCtrl") 
 const { joinContestSchema ,createContestSchema } = require("./app/Validations/ContestValidation")
 const http = require('http');
@@ -20,7 +19,7 @@ const paymentCtrl = require("./app/controllers/PaymentCtrl")
 const notificationCtrl = require("./app/controllers/NotificationCtrl")
 const matchValidation = require("./app/Validations/MatchValidation")
 const {userUpload ,matchUpload,playerUpload} = require("./app/helpers/S3")
-const playerValidation = require("./app/Validations/PlayerValidation")
+const {playerValidation,updatePlayerValidation} = require("./app/Validations/PlayerValidation")
 
 const server = http.createServer(app)
 const io = new Server(server,{
@@ -75,7 +74,7 @@ app.put("/api/match/:matchid/edit-team",authenticateUser,teamCtrl.updateTeam)
 app.get("/api/players",authenticateUser,authoriseUser(["admin"]),playerCtrl.listPlayers)
 app.post("/api/players",authenticateUser,playerUpload.single("pic"),checkSchema(playerValidation),playerCtrl.createPlayer)
 app.delete("/api/players/:id",authenticateUser,authoriseUser(["admin"]),playerCtrl.deletePlayer)
-app.put("/api/players/:id",authenticateUser,playerUpload.single("pic"),authoriseUser(["admin"]),checkSchema(playerValidation),playerCtrl.editPlayer)
+app.put("/api/players/:id",authenticateUser,playerUpload.single("pic"),authoriseUser(["admin"]),checkSchema(updatePlayerValidation),playerCtrl.editPlayer)
 
 
 //contest-routes
