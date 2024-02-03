@@ -92,10 +92,13 @@ matchCtrl.scoreUpdates = async (req,res)=>{
     const id = req.params.matchid
     const io = await getIOInstance()
     try{
+       
         const match = await Match.findByIdAndUpdate(id,req.body,{new : true}) 
         const players = [...match.team1players,...match.team2players]
+        
 
         const Teams = await Team.find({matchId : id})   
+        
 
         Teams.map(async(ele) =>{
             const t = []
@@ -106,9 +109,25 @@ matchCtrl.scoreUpdates = async (req,res)=>{
                 }
                })
             })
-            await Team.findByIdAndUpdate(ele._id,{team : t},{new :true})
+            //
+            totalpoints = t.reduce((acc,cv)=>{
+                if(cv.C){
+                    acc += cv.score.reduce((c,ce)=>c+=ce.points,0) * 2
+                }else if(cv.VC){
+                    acc += cv.score.reduce((c,ce)=>c +=ce.points,0) * 1.5
+                }
+                else{
+                    acc += cv.score.reduce((c,ce)=>c +=ce.points,0)
+                }
+                return acc
+            },0)
+            
+            //
+            await Team.findByIdAndUpdate(ele._id,{team : t,totalPoints : totalpoints},{new :true})
         })
         io.to(`${id}`).emit("update",[...match.team1players,...match.team2players])
+
+        io.to(`${id}`).emit("send_message",)
 
         res.status(200).json(match)
     }catch(e){
@@ -125,18 +144,12 @@ matchCtrl.generateResults = async (req,res) =>{
         console.log(contests)
         contests.map(async (ele) =>{
             const sort = ele.teams.sort((a,b)=>{
-                const t1 = a.team.reduce((acc,cv)=>{
-                  return acc +=cv.score
-                },0)
-                const t2 = b.team.reduce((acc,cv)=>{
-                  return acc +=cv.score
-                },0)
-                return t2 - t1
+                return b.totalPoints - a.totalPoints
               })
               await Contest.findByIdAndUpdate(ele._id,{teams : sort})
         })
         res.status(200).json("rank calculated successfully")
-    }catch(e){
+    }catch(e){ 
         res.json(e)
     }
 }
@@ -152,28 +165,92 @@ matchCtrl.declareResults = async (req,res) =>{
         }
 
         const contests = await Contest.find({matchid : matchid}).populate('teams')
-        console.log(contests)
+        const totalPrize = contests.reduce((acc,cv)=> acc+= cv.totalPrize,0)
+        console.log(totalPrize,"sadf")
+
+        const wallet = await Wallet.findById(process.env.ADMIN_WALLET)
+        console.log(wallet)
+
+        if(wallet.amount < totalPrize){
+            return res.status(400).json("Low wallet Balance")
+        }
+
         contests.map(async (ele) =>{
-            await Wallet.findOneAndUpdate({role : "admin"},{$inc: { amount : -ele.totalPrize}})
-            ele.teams.forEach((e,i) =>{
-                ele.prizeBreakup.forEach( async (prize) =>{
-                    if(prize.rank == i + 1){
-                        await Wallet.findOneAndUpdate({userId : e.userId},{$inc: { amount : prize.prize }})
+            await Wallet.findByIdAndUpdate(process.env.ADMIN_WALLET,{$inc: { amount : -ele.totalPrize}})
+            //checking teams with same scores
+            const duplicate = () => {
+                const obj = {};
+                const duplicates = [];
+            
+                ele.teams.forEach((team) => {
+                    const score = team.totalPoints;
+                    if (!obj[score]) {
+                        obj[score] = [team];
+                    } else {
+                        obj[score].push(team);
+                    }
+                });
+            
+                for (const key in obj) {
+                    duplicates.push(obj[key]);
+                }
+            
+                return duplicates.sort((a, b) => b[0].score - a[0].score);
+            };
+            
+            const duplicatesArray = duplicate();
+            const noDuplicates = duplicatesArray.every(ele => ele.length == 1)
+           
+            if(noDuplicates){
+                ele.teams.forEach((e,i) =>{
+                    ele.prizeBreakup.forEach( async (prize) =>{
+                        if(prize.rank == i + 1){
+                            await Wallet.findOneAndUpdate({userId : e.userId},{$inc: { amount : prize.prize }})
+                            const body = {
+                                userId : e.userId,
+                                text : `🏆 Congratulations you won Rs ${prize.prize} in ${match.team1} vs ${match.team2}`,
+                                date : new Date()
+                            }
+                            e.prize = prize.prize
+                            console.log(e.prize)
+                            const notification = new Notification(body)
+                            console.log(notification)
+                            await notification.save()
+                            io.to(`${e.userId}`).emit("notification","hi")
+                            io.to(matchid).emit("matchEnded","results for this match have been declared")
+                        }
+                    })
+                })
+            }else{
+                console.log(duplicatesArray)
+                let previousLength = 0
+                duplicatesArray.forEach((teams)=>{
+                    const length = teams.length
+                    let prize = 0
+                    for (let i = 0; i < length; i++) {
+                        prize += ele.prizeBreakup[i + previousLength]?.prize || 0;
+                    }
+                    const averagePrize = prize / length
+                    teams.forEach(async (team) => {
+                        if(averagePrize > 0){
+                        team.prize = averagePrize
+                        await Wallet.findOneAndUpdate({userId : team.userId},{$inc: { amount : averagePrize }})
                         const body = {
-                            userId : e.userId,
-                            text : `🏆 Congratulations you won Rs ${prize.prize} in ${match.team1} vs ${match.team2}`,
+                            userId : team.userId,
+                            text : `🏆 Congratulations you won Rs ${averagePrize} in ${match.team1} vs ${match.team2}`,
                             date : new Date()
                         }
                         const notification = new Notification(body)
-                        console.log(notification)
                         await notification.save()
-                        io.to(e.userId).emit("notification","hi")
-                        io.to(matchid).emit("matchEnded","results for this match have been declared")
-                    }
+                            io.to(`${team.userId}`).emit("notification","hi")
+                            io.to(matchid).emit("matchEnded","results for this match have been declared")
+                        }
+                    })
+                    previousLength += length
                 })
-            })
+            }
         })
-        await Match.findByIdAndUpdate(req.params.matchid,{isCompleted : true})
+        // await Match.findByIdAndUpdate(req.params.matchid,{isCompleted : true}) //editted
         res.json("results declared successfully")
     }catch(e){
         res.json(e)

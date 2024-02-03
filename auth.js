@@ -13,7 +13,7 @@ const authenticateUser = async (req,res,next) =>{
         if(user.isActive){
             next()
         }else{
-            res.status(400).json("ur account has been blocked , please contact the admin")
+            res.status(400).json({message : "ur account has been blocked , please contact the admin"})
         }
     }catch(e){
         res.status(500).json(e)

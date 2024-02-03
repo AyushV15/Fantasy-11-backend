@@ -26,7 +26,7 @@ const pic = {
             if(!req.file){
                 throw new Error("Please upload an image")
             }
-            const allowedType = ["image/avif"]
+            const allowedType = ["image/png"]
             if(!allowedType.includes(req.file.mimetype)){
                 throw new Error('Only AVIF images are allowed')
             }
@@ -42,7 +42,7 @@ const updatePic = {
     custom : {
         options : async (value,{req}) =>{
             if(req.file){
-                const allowedType = ["image/avif"]
+                const allowedType = ["image/png"]
                 if(!allowedType.includes(req.file.mimetype)){
                     throw new Error('Only AVIF images are allowed')
                 }

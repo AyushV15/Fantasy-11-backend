@@ -7,7 +7,15 @@ const matchSchema = new Schema({
         ref : "User"
     },
     matchId : Schema.Types.ObjectId,
-    team : []
+    team : [],
+    totalPoints : {
+        type : Number,
+        default : 0
+    },
+    prize : {
+        type : Number,
+        default : 0
+    }
 },{timestamps : true})
 
 const Team = model("Team",matchSchema)

@@ -9,6 +9,44 @@ const matchValidation = {
             errorMessage : "team2 name is required"
         }
     },
+    team1logo : {
+        custom : {
+            options : async (value,{req}) =>{
+            
+                const file = req.files.team1logo[0]
+                console.log(file)
+                if(!file){
+                    throw new Error("Please upload an image")
+                }
+                const allowedType = ["image/png","image/jpg","image/jpeg"]
+                if(!allowedType.includes(file.mimetype)){
+                    throw new Error('Only PNG/JPG/JPEG images are allowed')
+                }
+                const maxSizeInBytes = 3 * 1024 * 1024; // 3MB
+                if (file.size > maxSizeInBytes) {
+                    throw new Error('Image size exceeds 3MB limit')
+                }
+            }
+        }
+    },
+    team2logo : {
+        custom : {
+            options : async (value,{req}) =>{
+                const file = req.files.team2logo[0]
+                if(!file){
+                    throw new Error("Please upload an image")
+                }
+                const allowedType = ["image/png","image/jpg","image/jpeg","image/webp"]
+                if(!allowedType.includes(file.mimetype)){
+                    throw new Error('Only PNG/JPG/JPEG images are allowed')
+                }
+                const maxSizeInBytes = 3 * 1024 * 1024; // 3MB
+                if (file.size > maxSizeInBytes) {
+                    throw new Error('Image size exceeds 3MB limit')
+                }
+            }
+        }
+    },
     team1players : {
         custom : {
             options : (value) =>{

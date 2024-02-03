@@ -111,6 +111,10 @@ app.post("/api/reset-password",UserCtrl.resetPassword)
 
 
 
+app.get("/api/test",(req,res) =>{
+    io.to("65b0e42d234c516cb2474c40").emit("notification","hi")
+    res.send("success")
+})
 
 
  

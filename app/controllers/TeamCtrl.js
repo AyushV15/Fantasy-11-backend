@@ -1,13 +1,25 @@
 const _ = require("lodash")
 const Team = require("../models/Team")
 const User = require("../models/User")
+const { validationResult } = require("express-validator")
+const Match = require("../models/Match")
 
 const teamCtrl = {}
 
 teamCtrl.createTeam = async (req,res) =>{
-    const body = _.pick(req.body,["team"])
+    const errors = validationResult(req)
+
+    if(!errors.isEmpty()){
+        return res.status(400).json({error : errors.array()})
+    }
+    const body = _.pick(req.body,["team","deadline"])
     const id = req.params.matchid
+    
     try{
+        const match = await Match.findById(id)
+        if(new Date(match.deadline) < new Date()){
+            return res.status(400).json("match deadline has passed")
+        }
         const team = new Team(body)
         team.matchId = id
         team.userId =  req.user.id
@@ -16,6 +28,7 @@ teamCtrl.createTeam = async (req,res) =>{
         res.status(201).json(team)
     }catch(e){
         res.status(500).json(e)
+        console.log(e)
     }   
 }   
 

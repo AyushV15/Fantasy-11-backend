@@ -10,10 +10,7 @@ const playerSchema = new Schema({
         enum : ["wk","bat","all","bowl"]
     },
     nationality : String,
-    score : {
-        type :Number,
-        default : 0
-    },
+    score : [],
     C : {
         type :Boolean,
         default : false

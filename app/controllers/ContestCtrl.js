@@ -97,7 +97,7 @@ contestCtrl.cancelContests = async (req,res) =>{
                 await Wallet.findOneAndUpdate({userId : team.userId},{$inc : {amount : contest.entryFee}})
                 const notification = new Notification({
                     userId : team.userId,
-                    text : "Your Contest didnt fill up , we have initiated a refund",
+                    text : " ❌ Your Contest didnt fill up , we have initiated a refund",
                     date : new Date()
                 })
                 await notification.save()
