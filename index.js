@@ -23,7 +23,7 @@ const {playerValidation,updatePlayerValidation} = require("./app/Validations/Pla
 
 const server = http.createServer(app)
 const io = new Server(server,{
-    cors : {origin : "http://localhost:3000",methods : ["GET","POST"]}
+    cors : {origin : "https://fantasy11-weld.vercel.app",methods : ["GET","POST"]}
 })
 
 require("./config/socketConfig")(io)
