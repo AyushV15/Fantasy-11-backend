@@ -40,6 +40,10 @@ server.listen(port ,()=>{
 })
 
 app.use(express.json())
+
+app.get("/",(req,res) =>{
+    res.send("welcome to fantasy11")
+})
  
 //admin routes
 app.get("/api/users",authenticateUser,authoriseUser(["admin"]),UserCtrl.listUsers)
