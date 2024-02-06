@@ -17,14 +17,14 @@ const http = require('http');
 const {Server} = require('socket.io')
 const paymentCtrl = require("./app/controllers/PaymentCtrl")
 const notificationCtrl = require("./app/controllers/NotificationCtrl")
-const matchValidation = require("./app/Validations/MatchValidation")
+const {matchValidation,updateScoreValidation} = require("./app/Validations/MatchValidation")
 const {teamValidation} = require("./app/Validations/TeamValidations")
 const {userUpload ,matchUpload,playerUpload} = require("./app/helpers/S3")
 const {playerValidation,updatePlayerValidation} = require("./app/Validations/PlayerValidation")
 
 const server = http.createServer(app)
 const io = new Server(server,{
-    cors : {origin : "http://localhost:3000",methods : ["GET","POST"]}
+    cors : {origin : "https://fantasy11-weld.vercel.app",methods : ["GET","POST"]}
 })
 
 require("./config/socketConfig")(io)
@@ -61,9 +61,9 @@ app.put("/api/users/update-profile",authenticateUser,userUpload.single('profileP
 
 //match routes
 app.post("/api/create-match",authenticateUser,authoriseUser(["admin"]),multipleuploads,checkSchema(matchValidation),matchCtrl.createMatch)
-app.get("/api/upcoming-matches",authenticateUser,matchCtrl.upcomingMatches)
+app.get("/api/upcoming-matches",matchCtrl.upcomingMatches)
 app.get("/api/match/:id",authenticateUser,matchCtrl.oneMatch)   
-app.put('/api/match/:matchid/score-updates',authenticateUser,authoriseUser(['admin']),checkSchema(matchValidation),matchCtrl.scoreUpdates)
+app.put('/api/match/:matchid/score-updates',authenticateUser,authoriseUser(['admin']),checkSchema(updateScoreValidation),matchCtrl.scoreUpdates)
 app.delete("/api/match/:matchid/cancel-match",authenticateUser,authoriseUser(['admin']),matchCtrl.cancelMatch)
 app.put("/api/matches/:matchid",authenticateUser,authoriseUser(['admin']),matchCtrl.extendDeadline)
 app.get('/api/stats',authenticateUser,authoriseUser(["admin"]),matchCtrl.stats)

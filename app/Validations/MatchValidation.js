@@ -1,3 +1,5 @@
+const { isBoolean } = require("lodash")
+
 const matchValidation = {
     team1 : {
         notEmpty : {
@@ -49,23 +51,29 @@ const matchValidation = {
     },
     team1players : {
         custom : {
-            options : (value) =>{
-                if(JSON.parse(value).length < 11){
-                    throw new Error("team 1 must contain 11 players ")
-                }else{
-                    return true
-                }
-            }
-        },
-        custom : {
             options : (value,{req}) =>{
                 try{
-                    JSON.parse(value).forEach(ele =>{
-                        if(JSON.parse(req.body.team2players).some(e => e._id == ele._id)){
-                            throw new Error("duplicate players found")
-                        }
-                    })
-                    return true
+                const team1Players = JSON.parse(value);
+                const team2Players = JSON.parse(req.body.team2players);
+
+                if (team1Players.length < 11) {
+                    throw new Error("Team 1 must contain 11 players");
+                }
+
+                for (const ele of team1Players) {
+                    if (team2Players.some(e => e._id === ele._id)) {
+                        throw new Error("Duplicate players found");
+                    }
+                }
+
+                const roles = ["bat","bowl","wk","all"]
+                const team = team1Players.every(ele => ele.hasOwnProperty("_id" && "name" && "role" && "score" && "C" && "VC" && "pic" && "nationality") &&  ele._id && ele.name.trim().length > 3 && roles.includes(ele.role) && Array.isArray(ele.score) && isBoolean(ele.C) && isBoolean(ele.VC) && ele.pic.trim().slice(-4) == ".png" && ele.nationality.trim().length > 1)
+                if(!team){
+                    throw new Error("Error in team 1 players")
+                }
+
+                return true;
+        
                 }catch(e){
                     console.log(e)
                 }
@@ -77,7 +85,15 @@ const matchValidation = {
             options : (value) =>{
                 if(JSON.parse(value).length < 11){
                     throw new Error("team 2 must contain 11 players ")
-                }else{
+                }
+
+                const roles = ["bat","bowl","wk","all"]
+                const team = JSON.parse(value).every(ele => ele.hasOwnProperty("_id" && "name" && "role" && "score" && "C" && "VC" && "pic" && "nationality") &&  ele._id && ele.name.trim().length > 3 && roles.includes(ele.role) && Array.isArray(ele.score) && isBoolean(ele.C) && isBoolean(ele.VC) && ele.pic.trim().slice(-4) == ".png" && ele.nationality.trim().length > 1)
+                if(!team){
+                    throw new Error("Error in team 2 players")
+                }
+                 
+                else{
                     return true
                 }
             }
@@ -104,4 +120,38 @@ const matchValidation = {
     }
 } 
 
-module.exports = matchValidation
+const updateScoreValidation = {
+    team1players : {
+        custom : {
+            options : (value) =>{
+                const roles = ["bat","bowl","wk","all"]
+                const team = value.every(ele => ele.hasOwnProperty("_id" && "name" && "role" && "score" && "C" && "VC" && "pic" && "nationality") &&  ele._id && ele.name.trim().length > 3 && roles.includes(ele.role) && Array.isArray(ele.score) && isBoolean(ele.C) && isBoolean(ele.VC) && ele.pic.trim().slice(-4) == ".png" && ele.nationality.trim().length > 1)
+
+                if(!team){
+                    throw new Error("Error in team1players")
+                }else{
+                    return true
+                }
+            }
+        }
+    },
+    team2players : {
+        custom : {
+            options : (value) =>{
+                const roles = ["bat","bowl","wk","all"]
+                const team = value.every(ele => ele.hasOwnProperty("_id" && "name" && "role" && "score" && "C" && "VC" && "pic" && "nationality") &&  ele._id && ele.name.trim().length > 3 && roles.includes(ele.role) && Array.isArray(ele.score) && isBoolean(ele.C) && isBoolean(ele.VC) && ele.pic.trim().slice(-4) == ".png" && ele.nationality.trim().length > 1)
+
+                if(!team){
+                    throw new Error("Error in team2players")
+                }else{
+                    return true
+                }
+            }
+        }
+    }
+}
+
+module.exports = {
+    matchValidation : matchValidation,
+    updateScoreValidation : updateScoreValidation
+}

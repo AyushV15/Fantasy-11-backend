@@ -5,7 +5,7 @@ const notificationCtrl = {}
 // fetching users notifications
 notificationCtrl.list = async (req,res) =>{
     try{
-        const notification = await Notification.find({userId : req.user.id}).populate("matchId")
+        const notification = await Notification.find({userId : req.user.id})
         res.status(200).json(notification)
     }catch(e){
         res.status(500).json(e)

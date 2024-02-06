@@ -1,7 +1,6 @@
 let ioInstancePromise;
 
 module.exports = function (io) { 
-    console.log(io,"check")
     ioInstancePromise = new Promise((resolve) => {
         const connectionHandler = (socket) => {
             console.log('A user connected');
@@ -31,7 +30,7 @@ module.exports = function (io) {
     });
 };
 
-// Create a function to get the io instance
+// Creating a function to get the io instance
 module.exports.getIOInstance = async function () { 
     // Ensure ioInstancePromise is initialized
     if (!ioInstancePromise) {

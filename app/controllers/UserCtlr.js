@@ -170,7 +170,7 @@ UserCtrl.forgotPassword = async (req,res) =>{
                 from: process.env.NODEMAILER_EMAIL,
                 to: `${user.email}`,
                 subject: 'Fantasy 11 (reset - password-link)',
-                html : `<a href=http://localhost:3000/forgot-password?token=${token}>Click here to reset your password</a>
+                html : `<a href=https://fantasy11-weld.vercel.app/forgot-password?token=${token}>Click here to reset your password</a>
                 <p>OTP for changing password - <b>${number}</b></p>
                 <p>This link will be valid for only 10 minutes</p>`,
             };

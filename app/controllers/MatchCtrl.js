@@ -90,20 +90,18 @@ matchCtrl.scoreUpdates = async (req,res)=>{
     const id = req.params.matchid
     const io = await getIOInstance()
     const errors = validationResult(req)
-    // if(!errors.isEmpty()){
-    //     return res.status(400).json({errors : errors.array()})
-    //     co
-    // }
+    if(!errors.isEmpty()){
+        return res.status(400).json({errors : errors.array()})
+    }
     try{
         const body = _.pick(req.body , ["team1players","team2players"])
         console.log(body)
         // const match = await Match.findByIdAndUpdate(id,req.body,{new : true}) 
         const match = await Match.findByIdAndUpdate(id,{team1players : body.team1players,team2players : body.team2players },{new : true}) 
         const players = [...match.team1players,...match.team2players]
-        console.log(players)
         const Teams = await Team.find({matchId : id})   
         
-        Teams.map(async(ele,i) =>{
+        Teams.map(async(ele,i) =>{ 
             const t = []
             ele.team.map(e =>{
                players.forEach(p =>{
@@ -112,18 +110,23 @@ matchCtrl.scoreUpdates = async (req,res)=>{
                 }
                })
             })
-    
+            
             totalpoints = t.reduce((acc,cv)=>{
+                console.log(cv , "player 1")
                 if(cv.C){
-                    acc += cv.score.reduce((c,ce)=>c+=ce.points,0) * 2
+                    console.log("captain")
+                    acc += 2 * cv.score.reduce((c,ce)=>c+=ce.points,0)
                 }else if(cv.VC){
-                    acc += cv.score.reduce((c,ce)=>c +=ce.points,0) * 1.5
+                    console.log("vice captain")
+                    acc += 1.5 * cv.score.reduce((c,ce)=>c +=ce.points,0)
                 }
                 else{
+                    console.log("normal")
                     acc += cv.score.reduce((c,ce)=>c +=ce.points,0)
                 }
-                return acc
+                return acc 
             },0)
+            
             
             await Team.findByIdAndUpdate(ele._id,{team : t,totalPoints : totalpoints},{new :true})
         })
@@ -217,10 +220,10 @@ matchCtrl.declareResults = async (req,res) =>{
                             console.log(notification)
                             await notification.save()
                             io.to(`${e.userId}`).emit("notification","hi")
-                            io.to(matchid).emit("matchEnded","results for this match have been declared")
                         }
                     })
                 })
+               
             }else{
                 console.log(duplicatesArray)
                 let previousLength = 0
@@ -243,14 +246,15 @@ matchCtrl.declareResults = async (req,res) =>{
                         const notification = new Notification(body)
                         await notification.save()
                             io.to(`${team.userId}`).emit("notification","hi")
-                            io.to(matchid).emit("matchEnded","results for this match have been declared")
+                           
                         }
                     })
                     previousLength += length
                 })
             }
         })
-        // await Match.findByIdAndUpdate(req.params.matchid,{isCompleted : true}) //editted
+        io.to(matchid).emit("matchEnded","results for this match have been declared")
+        await Match.findByIdAndUpdate(req.params.matchid,{isCompleted : true}) 
         res.json("results declared successfully")
     }catch(e){
         res.json(e)

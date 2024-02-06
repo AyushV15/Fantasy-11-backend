@@ -14,7 +14,7 @@ const arr = [
 ]
 
 const roles = ["bat","bowl","all","wk"]
-console.log(arr.every(ele => ele._id && ele.name.trim().length > 3 && roles.includes(ele.role) && Array.isArray(ele.score) && isBoolean(ele.C) && isBoolean(ele.VC) && ele.pic.trim().slice(-4) == ".png" && ele.nationality.trim().length > 1))
+console.log(arr.every(ele => ele._id && ele.hasOwnProperty("_id" && "name" && "role" && "score" && "C" && "VC" && "pic" && "nationality") && ele.name.trim().length > 3 && roles.includes(ele.role) && Array.isArray(ele.score) && isBoolean(ele.C) && isBoolean(ele.VC) && ele.pic.trim().slice(-4) == ".png" && ele.nationality.trim().length > 1))
 
 
 console.log("Virat Kohli.png".slice(-3))

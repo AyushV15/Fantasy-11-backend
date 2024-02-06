@@ -51,7 +51,6 @@ teamCtrl.updateTeam = async (req,res) =>{
     try{
         const team = await Team.findOneAndUpdate({userId : req.user.id , matchId : matchid},req.body)
         res.status(200).json(team)
-        console.log(team)
     }catch(e){
         res.status(500).json(e)
     }

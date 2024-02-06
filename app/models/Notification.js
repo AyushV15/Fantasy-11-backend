@@ -10,11 +10,6 @@ const notificationSchema = new Schema({
         type : String ,
         required : true
     },
-    matchId : {
-        type : Schema.Types.ObjectId,
-        ref : "Match",
-        required : true
-    },
     date : {
         type : Date,
         required : true

@@ -7,19 +7,7 @@ const teamSchema = new Schema({
         ref : "User"
     },
     matchId : Schema.Types.ObjectId,
-    team : [{
-        name : String,
-        role : {
-            type : String,
-            enum : ["bat","bowl","wk","all"]
-        },
-        C : Boolean,
-        VC : Boolean,
-        nationality : String,
-        pic : String,
-        score : [],
-        team : String
-    }],
+    team : [],
     totalPoints : {
         type : Number,
         default : 0
