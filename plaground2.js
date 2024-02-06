@@ -1,6 +1,6 @@
 const teams = [
     { name: "team1", score: 90 },
-    { name: "team2", score: 80 },
+    { name: "team2", score: 90 },
     { name: "team3", score: 70 }
 
 ];
@@ -22,7 +22,7 @@ const duplicate = () => {
             obj[score].push(team);
         }
     });
-
+    
     for (const key in obj) {
         duplicates.push(obj[key]);
     }
@@ -41,16 +41,16 @@ if (duplicatesArray.every(ele => ele.length === 1)) {
         });
     });
 } else {
-    let previousLength = 0;
-    duplicatesArray.forEach((ele, index) => {
-        const length = ele.length;
-        let prize = 0;
+    let previousLength = 0; //2
+    duplicatesArray.forEach((ele,) => {
+        const length = ele.length; //2
+        let prize = 0; //0,90,130
         for (let i = 0; i < length; i++) {
             prize += prizeBreakup[i + previousLength]?.prize || 0;
         }
-        const averagePrize = prize / length;
+        const averagePrize = prize / length; 65
 
-        ele.forEach((team, teamIndex) => {
+        ele.forEach((team) => {
             team.prize = averagePrize;
         });
 

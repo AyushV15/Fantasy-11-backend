@@ -7,6 +7,7 @@ const User = require("../models/User")
 const Notification = require("../models/Notification")
 const Wallet = require("../models/Wallet")
 const { getIOInstance } = require("../../config/socketConfig")
+const { default: mongoose } = require("mongoose")
 
 
 
@@ -39,14 +40,11 @@ matchCtrl.createMatch = async (req,res) =>{
     const body = _.pick(req.body,["team1","team2",'tournament',"deadline","team1logo","team2logo","team1players","team2players"])
     const team1 = JSON.parse(body.team1players)
     const team2 = JSON.parse(body.team2players)
-    console.log(req.files)
    
     body.team1logo = req.files.team1logo[0].originalname
     body.team2logo = req.files.team2logo[0].originalname
     try{ 
         const match = new Match(body)
-        // match.team1players = team1
-        // match.team2players = team2
         match.team1players = team1.map(ele =>{
             return {...ele , team : body.team1}
         })
@@ -91,16 +89,21 @@ matchCtrl.oneMatch = async (req,res) =>{
 matchCtrl.scoreUpdates = async (req,res)=>{
     const id = req.params.matchid
     const io = await getIOInstance()
+    const errors = validationResult(req)
+    // if(!errors.isEmpty()){
+    //     return res.status(400).json({errors : errors.array()})
+    //     co
+    // }
     try{
-       
-        const match = await Match.findByIdAndUpdate(id,req.body,{new : true}) 
+        const body = _.pick(req.body , ["team1players","team2players"])
+        console.log(body)
+        // const match = await Match.findByIdAndUpdate(id,req.body,{new : true}) 
+        const match = await Match.findByIdAndUpdate(id,{team1players : body.team1players,team2players : body.team2players },{new : true}) 
         const players = [...match.team1players,...match.team2players]
-        
-
+        console.log(players)
         const Teams = await Team.find({matchId : id})   
         
-
-        Teams.map(async(ele) =>{
+        Teams.map(async(ele,i) =>{
             const t = []
             ele.team.map(e =>{
                players.forEach(p =>{
@@ -109,7 +112,7 @@ matchCtrl.scoreUpdates = async (req,res)=>{
                 }
                })
             })
-            //
+    
             totalpoints = t.reduce((acc,cv)=>{
                 if(cv.C){
                     acc += cv.score.reduce((c,ce)=>c+=ce.points,0) * 2
@@ -122,15 +125,12 @@ matchCtrl.scoreUpdates = async (req,res)=>{
                 return acc
             },0)
             
-            //
             await Team.findByIdAndUpdate(ele._id,{team : t,totalPoints : totalpoints},{new :true})
         })
         io.to(`${id}`).emit("update",[...match.team1players,...match.team2players])
 
-        io.to(`${id}`).emit("send_message",)
-
         res.status(200).json(match)
-    }catch(e){
+    }catch(e){ 
         res.status(500).json(e)
         console.log(e)
     }
@@ -279,15 +279,14 @@ matchCtrl.cancelMatch =  async (req,res) =>{
 
 matchCtrl.extendDeadline = async (req,res) =>{
     const id = req.params.matchid
-    const {deadline,message} = req.body
-  
+    const body = _.pick(req.body , ["deadline","message"])
     try{
-        const match = await Match.findByIdAndUpdate(id,{deadline : deadline,message : message},{new : true})
+        const match = await Match.findByIdAndUpdate(id,{deadline : body.deadline,message : body.message},{new : true})
         const io = await getIOInstance()
         io.to(`${req.params.matchid}`).emit("extended",match)
         res.status(200).json(match)
     }catch(e){
-        console.log(e)
+        res.status(500).json(e)
     }
 }
 
@@ -325,7 +324,7 @@ matchCtrl.stats = async (req,res) =>{
                         $map: {
                             input: "$contests", //array
                             as: "contest", //each element
-                            in: { $multiply: ["$$contest.entryFee", { $size: "$$contest.teams" }] }  //evaluation
+                            in: { $multiply: ["$$contest.entryFee", { $size: "$$contest.teams" }] }  //operation
                         }
                     },
                     profit : {

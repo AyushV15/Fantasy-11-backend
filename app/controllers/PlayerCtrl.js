@@ -4,8 +4,8 @@ const _ = require("lodash")
 
 playerCtrl = {}
 
+//creating a player (admin)
 playerCtrl.createPlayer = async (req,res) =>{
-    console.log(req.body)
     const errors = validationResult(req)
     if(!errors.isEmpty()){
         return res.status(400).json({errors : errors.array()})
@@ -15,7 +15,6 @@ playerCtrl.createPlayer = async (req,res) =>{
     try{
         const player = new Player(body)
         player.pic = req.file.originalname
-        console.log(player,"player")
         await player.save()
         res.status(201).json(player)
     }catch(e){
@@ -23,6 +22,7 @@ playerCtrl.createPlayer = async (req,res) =>{
     }   
 }   
 
+//listing player (admin)
 playerCtrl.listPlayers = async (req,res) =>{
     try{
         const Players = await Player.find()
@@ -32,6 +32,7 @@ playerCtrl.listPlayers = async (req,res) =>{
     }
 }
 
+//deleting player (admin)
 playerCtrl.deletePlayer = async (req,res) =>{
     const id = req.params.id
     try{
@@ -43,6 +44,7 @@ playerCtrl.deletePlayer = async (req,res) =>{
     }
 }
 
+//updating player (admin)
 playerCtrl.editPlayer = async (req,res) =>{
     const errors = validationResult(req)
     if(!errors.isEmpty()){
@@ -59,7 +61,6 @@ playerCtrl.editPlayer = async (req,res) =>{
         res.status(200).json(player)
     }catch(e){
         res.status(500).json(e)
-        console.log(e)
     }
 }
 

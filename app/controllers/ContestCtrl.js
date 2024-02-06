@@ -1,11 +1,13 @@
 const { validationResult } = require("express-validator")
 const Contest = require("../models/Contest")
 const Wallet = require("../models/Wallet")
+const Match = require("../models/Match")
 const Notification = require("../models/Notification")
 const { getIOInstance } = require("../../config/socketConfig")
 
 const contestCtrl = {}
 
+//listing all the contests of a particular match
 contestCtrl.listContest = async (req,res) =>{
     const id = req.params.matchid
     try{
@@ -16,7 +18,7 @@ contestCtrl.listContest = async (req,res) =>{
     }
 }
 
-
+//creating contest for a match (admin)
 contestCtrl.createContest = async (req,res) =>{
 
     const errors = validationResult(req)
@@ -36,6 +38,7 @@ contestCtrl.createContest = async (req,res) =>{
     }   
 }
  
+//joining a contest for a match (user)
 contestCtrl.joinContest = async (req,res) =>{
 
     const errors = validationResult(req)
@@ -43,9 +46,14 @@ contestCtrl.joinContest = async (req,res) =>{
         return res.status(400).json({errors : errors.array()})
     }
     const id = req.params.contestid 
+    const matchid = req.params.matchid
     const {team,entryFee} = req.body
     console.log(entryFee)
     try{
+        const match = await Match.findById(matchid)
+        if(new Date(match.deadline) < new Date()){
+            return res.status(400).json({errors : "Match deadline has passed"})
+        }
         const wallet =  await Wallet.findOne({userId : req.user.id})
         if(wallet.amount < entryFee){
             return res.status(400).json({errors : "Low wallet balance"})
@@ -61,6 +69,7 @@ contestCtrl.joinContest = async (req,res) =>{
     }
 }
 
+//fetching users contest for a particular match
 contestCtrl.userContest = async (req,res) =>{
     const matchid = req.params.matchid
    
@@ -77,9 +86,10 @@ contestCtrl.userContest = async (req,res) =>{
             }
       })
 
-    res.json(matchingContest)
+    res.status(200).json(matchingContest)
 }
 
+// cancelling unfilled or partially filled contests (admin)
 contestCtrl.cancelContests = async (req,res) =>{
     const id = req.params.matchid
     const io = await getIOInstance()

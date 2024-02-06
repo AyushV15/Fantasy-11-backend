@@ -2,13 +2,23 @@ const mongoose = require("mongoose")
 const {Schema , model} = mongoose
 
 const notificationSchema = new Schema({
-    userId : Schema.Types.ObjectId,
-    text : String,
+    userId : {
+        type : Schema.Types.ObjectId,
+        required : true
+    },
+    text : {
+        type : String ,
+        required : true
+    },
     matchId : {
         type : Schema.Types.ObjectId,
-        ref : "Match"
+        ref : "Match",
+        required : true
     },
-    date : Date
+    date : {
+        type : Date,
+        required : true
+    }
 })
 
 const Notification = model("Notification",notificationSchema)

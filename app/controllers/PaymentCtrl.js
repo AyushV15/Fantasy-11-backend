@@ -4,12 +4,15 @@ const Payment = require('../models/Payment')
 const stripe = require('stripe')
 (process.env.STRIPE_KEY)
 
-
+// payment checkout route
 paymentCtrl.checkout = async (req,res) =>{
     const {amount,name,id} =  req.body
 
-    console.log(amount)
+    if(amount > 1000){
+        res.status(400).json({message : "amount must be less than or equal to 1000"})
+    }
 
+    //adding line items (in this case the amount user has enetered)
     const lineItems = [{
         price_data : {
             currency : "inr",
@@ -41,8 +44,10 @@ paymentCtrl.checkout = async (req,res) =>{
             cancel_url : process.env.FAILURE_URL,
             customer : customer.id
         })
+        //sending session id and url to frontend
         res.json({id : session.id , url : session.url })
 
+        //creating payment model and keeping status as pending
         if(session.id){
             const payment = new Payment({
                 userId : id,
@@ -51,11 +56,11 @@ paymentCtrl.checkout = async (req,res) =>{
                 paymentType : session.payment_method_types[0],
                 transaction_Id : session.id
             })
-            payment.save()
+            await payment.save()
         }
 
     }catch(e){
-        console.log(e)
+        res.status(500).json(e)
     }
 }
 
@@ -68,7 +73,7 @@ paymentCtrl.updatePayment = async (req,res) =>{
         }
         res.status(200).json("payment success")
     }catch(e){
-        res.json(e)
+        res.status(500).json(e)
     }
 }
 

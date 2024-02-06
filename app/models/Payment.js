@@ -2,16 +2,31 @@ const mongoose = require("mongoose")
 const {Schema , model} = mongoose
 
 const paymentSchema = new Schema({
-    userId : Schema.Types.ObjectId,
-    amount : Number,
-    date : String,
+    userId : {
+        type : Schema.Types.ObjectId,
+        required : true
+    },
+    amount : {
+        type : Number,
+        required : true
+    },
+    date : {
+        type : String,
+        required : true
+    },
     status : {
         type : String,
         default : "pending",
         enum : ["pending","successfull"]
     },
-    paymentType : String,
-    transaction_Id : String
+    paymentType : {
+        type : String,
+        required : true
+    },
+    transaction_Id : {
+        type : String,
+        required : true
+    }
 })
 
 const Payment = model("Payment",paymentSchema)

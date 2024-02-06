@@ -28,7 +28,7 @@ const pic = {
             }
             const allowedType = ["image/png"]
             if(!allowedType.includes(req.file.mimetype)){
-                throw new Error('Only AVIF images are allowed')
+                throw new Error('Only PNG images are allowed')
             }
             const maxSizeInBytes = 3 * 1024 * 1024; // 3MB
             if (req.file.size > maxSizeInBytes) {
@@ -44,7 +44,7 @@ const updatePic = {
             if(req.file){
                 const allowedType = ["image/png"]
                 if(!allowedType.includes(req.file.mimetype)){
-                    throw new Error('Only AVIF images are allowed')
+                    throw new Error('Only PNG images are allowed')
                 }
                 const maxSizeInBytes = 3 * 1024 * 1024; // 3MB
                 if (req.file.size > maxSizeInBytes) {

@@ -38,7 +38,7 @@ const matchValidation = {
                 }
                 const allowedType = ["image/png","image/jpg","image/jpeg","image/webp"]
                 if(!allowedType.includes(file.mimetype)){
-                    throw new Error('Only PNG/JPG/JPEG images are allowed')
+                    throw new Error('Only PNG/JPG/JPEG/webp images are allowed')
                 }
                 const maxSizeInBytes = 3 * 1024 * 1024; // 3MB
                 if (file.size > maxSizeInBytes) {

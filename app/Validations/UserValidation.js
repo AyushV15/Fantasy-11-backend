@@ -93,10 +93,10 @@ const updateProfileValidation = {
         custom : {
             options : async (value, {req}) =>{
                 if(req.file){
-                    const allowedType = ["image/jpeg"]
-                    console.log(req.file.mimetype)
+                    const allowedType = ["image/jpeg","image/jpg","image/png"]
+                    
                     if(!allowedType.includes(req.file.mimetype)){
-                        throw new Error('Only JPEG/JPG images are allowed')
+                        throw new Error('Only JPEG/JPG/PNG images are allowed')
                     }
                     const maxSizeInBytes = 3 * 1024 * 1024; // 3MB
                     if (req.file.size > maxSizeInBytes) {
@@ -113,7 +113,7 @@ const updateProfileValidation = {
             options : async (value,{req}) =>{
                 if(Object.keys(req.body).length > 0){
                     if(value.trim().length < 8){
-                        console.log(value,"inside valid")
+                        
                         throw new Error("current Password should be between 8 to 128 characters")
                     }
                 }else{

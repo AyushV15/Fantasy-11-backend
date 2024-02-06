@@ -1,7 +1,6 @@
 const { validationResult } = require("express-validator")
 const _ = require("lodash")
 const User = require("../models/User")
-const { getIOInstance } = require("../../config/socketConfig")
 
 
 const bcryptjs = require("bcryptjs")
@@ -10,7 +9,7 @@ const Wallet = require("../models/Wallet")
 const nodemailer = require("nodemailer")
 const UserCtrl = {}
 
-
+//listing all users (admin)
 UserCtrl.listUsers = async (req,res) =>{
     try{
         const users = await User.find()
@@ -20,6 +19,7 @@ UserCtrl.listUsers = async (req,res) =>{
     } 
 }
 
+//activate/deactivate user (admin)
 UserCtrl.controlUser = async (req,res) =>{
     const {id,status} = req.body
     try{
@@ -31,6 +31,7 @@ UserCtrl.controlUser = async (req,res) =>{
     }
 }
 
+// registering a user 
 UserCtrl.register = async (req,res) =>{
     const errors = validationResult(req)
     if(!errors.isEmpty()){
@@ -40,7 +41,7 @@ UserCtrl.register = async (req,res) =>{
     try{
         const user = new User(body)
         const salt = await bcryptjs.genSalt()
-        const encryptedPassword = await bcryptjs.hash(user.password,salt)
+        const encryptedPassword = await bcryptjs.hash(user.password,salt) // encrypting password with bycrpyt js
         user.password = encryptedPassword
         const userCount = await User.countDocuments()
         if(userCount == 0){
@@ -57,6 +58,8 @@ UserCtrl.register = async (req,res) =>{
     }
 }
 
+
+//logging in a user 
 UserCtrl.login = async (req,res) =>{
     const errors = validationResult(req)
     if(!errors.isEmpty()){
@@ -88,7 +91,7 @@ UserCtrl.login = async (req,res) =>{
     }
 }
 
-
+// fetching users data 
 UserCtrl.account = async (req,res)=>{
     try {
         const user = await User.findById(req.user.id).populate("matches")
@@ -101,6 +104,7 @@ UserCtrl.account = async (req,res)=>{
     }
 }
 
+//updating user profile
 UserCtrl.updateProfile = async (req,res) =>{
     const errors = validationResult(req)
     console.log(errors,"sadf")
@@ -130,7 +134,7 @@ UserCtrl.updateProfile = async (req,res) =>{
     } 
 }
 
-
+// fetching users wallet
 UserCtrl.wallet = async (req,res) =>{
     try{
         const wallet = await Wallet.findOne({userId : req.user.id})
@@ -141,6 +145,7 @@ UserCtrl.wallet = async (req,res) =>{
     }
 }
 
+// handling forgot password
 UserCtrl.forgotPassword = async (req,res) =>{
         const {email} = req.query 
         console.log(email)
@@ -148,7 +153,7 @@ UserCtrl.forgotPassword = async (req,res) =>{
         try{
         const user = await User.findOne({email : email})
         if(user){
-            let mailTransporter = nodemailer.createTransport({
+            let mailTransporter = nodemailer.createTransport({ 
                 service: 'gmail',
                 auth: {
                     user: process.env.NODEMAILER_EMAIL,
@@ -156,12 +161,12 @@ UserCtrl.forgotPassword = async (req,res) =>{
                 }
             });
 
-            const number = Math.floor(Math.random() * 90000) + 10000
-            const tokendata = {number : number , email : email}
+            const number = Math.floor(Math.random() * 90000) + 10000 // generating 5 digit random number
+            const tokendata = {number : number , email : email} 
             const token = jwt.sign(tokendata,process.env.JWT,{expiresIn : "10min"})
             res.status(200).json({token : token})
             
-            let mailDetails = {
+            let mailDetails = { // sending email to the user for resetting password
                 from: process.env.NODEMAILER_EMAIL,
                 to: `${user.email}`,
                 subject: 'Fantasy 11 (reset - password-link)',
@@ -185,13 +190,14 @@ UserCtrl.forgotPassword = async (req,res) =>{
     }
 }
 
+//resetting users password 
 UserCtrl.resetPassword = async (req,res) =>{
     const {password ,email,token,otp} = req.body
     try{
         const tokendata = await jwt.verify(token,process.env.JWT)
     
         if(tokendata.number !== Number(otp)){
-            return res.status(400).json("invalid otp")
+            return res.status(400).json("invalid otp") // verifying otp 
         }
         const salt = await bcryptjs.genSalt()
         const newPassword = await bcryptjs.hash(password,salt)

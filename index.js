@@ -18,12 +18,13 @@ const {Server} = require('socket.io')
 const paymentCtrl = require("./app/controllers/PaymentCtrl")
 const notificationCtrl = require("./app/controllers/NotificationCtrl")
 const matchValidation = require("./app/Validations/MatchValidation")
+const {teamValidation} = require("./app/Validations/TeamValidations")
 const {userUpload ,matchUpload,playerUpload} = require("./app/helpers/S3")
 const {playerValidation,updatePlayerValidation} = require("./app/Validations/PlayerValidation")
 
 const server = http.createServer(app)
 const io = new Server(server,{
-    cors : {origin : "https://fantasy11-weld.vercel.app",methods : ["GET","POST"]}
+    cors : {origin : "http://localhost:3000",methods : ["GET","POST"]}
 })
 
 require("./config/socketConfig")(io)
@@ -62,16 +63,16 @@ app.put("/api/users/update-profile",authenticateUser,userUpload.single('profileP
 app.post("/api/create-match",authenticateUser,authoriseUser(["admin"]),multipleuploads,checkSchema(matchValidation),matchCtrl.createMatch)
 app.get("/api/upcoming-matches",authenticateUser,matchCtrl.upcomingMatches)
 app.get("/api/match/:id",authenticateUser,matchCtrl.oneMatch)   
-app.put('/api/match/:matchid/score-updates',authenticateUser,authoriseUser(['admin']),matchCtrl.scoreUpdates)
-app.delete("/api/match/:matchid/cancel-match",authenticateUser,matchCtrl.cancelMatch)
+app.put('/api/match/:matchid/score-updates',authenticateUser,authoriseUser(['admin']),checkSchema(matchValidation),matchCtrl.scoreUpdates)
+app.delete("/api/match/:matchid/cancel-match",authenticateUser,authoriseUser(['admin']),matchCtrl.cancelMatch)
 app.put("/api/matches/:matchid",authenticateUser,authoriseUser(['admin']),matchCtrl.extendDeadline)
 app.get('/api/stats',authenticateUser,authoriseUser(["admin"]),matchCtrl.stats)
 
 
 //team routes
-app.post("/api/match/:matchid/create-team",authenticateUser,teamCtrl.createTeam)
+app.post("/api/match/:matchid/create-team",authenticateUser,authoriseUser(["user"]),checkSchema(teamValidation),teamCtrl.createTeam)
 app.get("/api/match/:matchid/team",authenticateUser,teamCtrl.getTeam)
-app.put("/api/match/:matchid/edit-team",authenticateUser,teamCtrl.updateTeam)  
+app.put("/api/match/:matchid/edit-team",authenticateUser,authoriseUser(["user"]),teamCtrl.updateTeam)  
 
 
 //players routes
@@ -84,7 +85,7 @@ app.put("/api/players/:id",authenticateUser,playerUpload.single("pic"),authorise
 //contest-routes
 app.get("/api/match/:matchid/contest",authenticateUser,contestCtrl.listContest)
 app.post("/api/match/:matchid/create-contest",checkSchema(createContestSchema),contestCtrl.createContest)
-app.put("/api/contest/:contestid",authenticateUser,checkSchema(joinContestSchema),contestCtrl.joinContest)
+app.put("/api/:matchid/contest/:contestid",authenticateUser,checkSchema(joinContestSchema),contestCtrl.joinContest)
 app.get("/api/contest/:matchid",authenticateUser,contestCtrl.userContest)
 app.delete("/api/match/:matchid/cancel-contests",authenticateUser,authoriseUser(["admin"]),contestCtrl.cancelContests)
 
@@ -113,12 +114,6 @@ app.delete('/api/users/notifications',authenticateUser,notificationCtrl.clear)
 app.get("/api/forgot-password",UserCtrl.forgotPassword)
 app.post("/api/reset-password",UserCtrl.resetPassword)
 
-
-
-app.get("/api/test",(req,res) =>{
-    io.to("65b0e42d234c516cb2474c40").emit("notification","hi")
-    res.send("success")
-})
 
 
  
